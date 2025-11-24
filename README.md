@@ -33,7 +33,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture and scalability
 
 ```bash
 # Navigate to project directory
-cd /home/kirti/Documents/testing
+cd your path
 
 # Activate virtual environment
 source venv/bin/activate
@@ -59,11 +59,7 @@ Place your sales data files in the `Sales Dataset/Sales Dataset/` directory. Sup
 - Excel files (`.xlsx`, `.xls`)
 - JSON files (`.json`)
 
-### 4. Run the Application
 
-```bash
-streamlit run app.py
-```
 
 The application will open in your browser at `http://localhost:8501`
 
@@ -112,12 +108,10 @@ testing/
 │   └── summarization_agent.py       # Generates summaries
 ├── Sales Dataset/
 │   └── Sales Dataset/                # Your data files here
-├── app.py                            # Streamlit UI
 ├── langgraph_agent.py                # LangGraph orchestration
 ├── data_processor.py                 # Data processing layer
 ├── config.py                         # Configuration
 ├── requirements.txt                  # Dependencies
-├── ARCHITECTURE.md                   # Architecture documentation
 └── README.md                         # This file
 ```
 
@@ -145,14 +139,6 @@ testing/
 3. **Data Extraction**: The Data Extraction Agent executes the SQL and retrieves data
 4. **Validation**: The Validation Agent checks the results for accuracy
 5. **Answer Generation**: The system generates a natural language answer with visualizations
-
-## 🚀 Scaling to 100GB+
-
-For large-scale deployments (100GB+ datasets), see [ARCHITECTURE.md](ARCHITECTURE.md) for:
-- Distributed processing strategies
-- Cloud data warehouse integration
-- Vector indexing and RAG implementation
-- Cost optimization techniques
 
 ## 🐛 Troubleshooting
 
