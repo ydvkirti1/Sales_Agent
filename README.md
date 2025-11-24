@@ -7,8 +7,6 @@ A GenAI-powered solution for analyzing large-scale retail sales data, generating
 - **Multi-Agent System**: Powered by LangGraph with specialized agents for query resolution, data extraction, and validation
 - **Natural Language Q&A**: Ask questions about your sales data in plain English
 - **Automated Summarization**: Generate comprehensive business insights from your data
-- **Scalable Architecture**: Designed to handle datasets from MB to 100GB+
-- **Interactive UI**: Streamlit-based interface for easy interaction
 
 ## 🏗️ Architecture
 
@@ -19,7 +17,6 @@ The system uses a multi-agent architecture with the following components:
 3. **Validation Agent**: Validates query results and ensures data quality
 4. **Summarization Agent**: Generates business insights and summaries
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed architecture and scalability design.
 
 ## 📋 Prerequisites
 
