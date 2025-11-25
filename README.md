@@ -7,6 +7,7 @@ A GenAI-powered solution for analyzing large-scale retail sales data, generating
 - **Multi-Agent System**: Powered by LangGraph with specialized agents for query resolution, data extraction, and validation
 - **Natural Language Q&A**: Ask questions about your sales data in plain English
 - **Automated Summarization**: Generate comprehensive business insights from your data
+- **REST API**: FastAPI-based backend with interactive API documentation
 
 ## 🏗️ Architecture
 
@@ -56,33 +57,139 @@ Place your sales data files in the `Sales Dataset/Sales Dataset/` directory. Sup
 - Excel files (`.xlsx`, `.xls`)
 - JSON files (`.json`)
 
+### 4. Run the API Server
 
+```bash
+# Option 1: Using the run script (recommended)
+python run_api.py
 
-The application will open in your browser at `http://localhost:8501`
+# Option 2: Using uvicorn directly
+uvicorn api:app --host 0.0.0.0 --port 8000 --reload
+```
+
+The API will be available at:
+- **API Base URL**: http://localhost:8000
+- **Interactive API Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
 
 ## 📖 Usage Guide
 
-### Q&A Mode
+### Using the Interactive API Documentation
 
-1. Click on the **💬 Q&A Mode** tab
-2. Enter your question in natural language, for example:
-   - "Which category saw the highest sales in Q3?"
-   - "What was the total revenue last month?"
-   - "Show me top 10 products by sales"
-3. Click **🔍 Ask** to process your query
-4. View the answer, generated SQL query, and data visualizations
+1. Start the API server: `python run_api.py`
+2. Open your browser: http://localhost:8000/docs
+3. Click on any endpoint to expand it
+4. Click "Try it out" button
+5. Fill in the request parameters
+6. Click "Execute" to test
+
+### Initialize System
+
+**Endpoint**: `POST /initialize`
+
+```bash
+curl -X POST "http://localhost:8000/initialize" \
+  -H "Content-Type: application/json" \
+  -d '{"openai_api_key": "sk-your-key"}'
+```
+
+Or if API key is in `.env` file:
+```bash
+curl -X POST "http://localhost:8000/initialize" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### Q&A Mode - Ask Questions
+
+**Endpoint**: `POST /query`
+
+```bash
+curl -X POST "http://localhost:8000/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "What is the total sales by category?",
+    "mode": "qa"
+  }'
+```
+
+**Example Questions:**
+- "Which category saw the highest sales in Q3?"
+- "What was the total revenue last month?"
+- "Show me top 10 products by sales"
+
+**Response includes:**
+- Natural language answer
+- Generated SQL query
+- Query results data
+- Validation results
 
 ### Summarization Mode
 
-1. Click on the **📝 Summarization Mode** tab
-2. Click **📊 Generate Summary**
-3. Review the comprehensive business insights generated from your data
+**Endpoint**: `POST /query`
 
-### Data Explorer
+```bash
+curl -X POST "http://localhost:8000/query" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Generate a comprehensive business summary",
+    "mode": "summarization"
+  }'
+```
 
-1. Click on the **📊 Data Explorer** tab
-2. Select a dataset from the dropdown
-3. Explore the data with interactive tables and statistics
+### Get Available Datasets
+
+**Endpoint**: `GET /datasets`
+
+```bash
+curl http://localhost:8000/datasets
+```
+
+### Get Dataset Data
+
+**Endpoint**: `GET /datasets/{dataset_name}`
+
+```bash
+curl "http://localhost:8000/datasets/amazon_sale_report?limit=100"
+```
+
+### Get Schema Information
+
+**Endpoint**: `GET /schema`
+
+```bash
+curl http://localhost:8000/schema
+```
+
+## 🐍 Python Example
+
+```python
+import requests
+
+BASE_URL = "http://localhost:8000"
+
+# 1. Initialize system
+response = requests.post(f"{BASE_URL}/initialize", json={
+    "openai_api_key": "sk-your-key"
+})
+print(response.json())
+
+# 2. Ask a question
+response = requests.post(f"{BASE_URL}/query", json={
+    "query": "What is the total sales by category?",
+    "mode": "qa"
+})
+result = response.json()
+print(f"Answer: {result['answer']}")
+print(f"SQL: {result['sql_query']}")
+
+# 3. Generate summary
+response = requests.post(f"{BASE_URL}/query", json={
+    "query": "Generate summary",
+    "mode": "summarization"
+})
+print(f"Summary: {response.json()['summary']}")
+```
 
 ## 🔧 Configuration
 
@@ -105,6 +212,8 @@ testing/
 │   └── summarization_agent.py       # Generates summaries
 ├── Sales Dataset/
 │   └── Sales Dataset/                # Your data files here
+├── api.py                            # FastAPI backend
+├── run_api.py                        # API server runner
 ├── langgraph_agent.py                # LangGraph orchestration
 ├── data_processor.py                 # Data processing layer
 ├── config.py                         # Configuration
@@ -131,11 +240,12 @@ testing/
 
 ## 🔍 How It Works
 
-1. **User Input**: You ask a question in natural language
+1. **User Request**: Send a question via API endpoint
 2. **Query Resolution**: The Query Resolution Agent converts your question to SQL
 3. **Data Extraction**: The Data Extraction Agent executes the SQL and retrieves data
 4. **Validation**: The Validation Agent checks the results for accuracy
-5. **Answer Generation**: The system generates a natural language answer with visualizations
+5. **Answer Generation**: The system generates a natural language answer
+6. **Response**: API returns JSON with answer, SQL, data, and validation results
 
 ## 🐛 Troubleshooting
 
@@ -143,16 +253,23 @@ testing/
 - Ensure your API key is set in the `.env` file
 - Verify API key has sufficient credits/quota in your OpenAI account
 - Check that the API key is correct and active
+- You can also pass API key in the `/initialize` request
 
 ### Data Loading Issues
-- Ensure data files are in the correct directory
+- Ensure data files are in the correct directory: `Sales Dataset/Sales Dataset/`
 - Check file formats are supported (CSV, Excel, JSON)
 - Verify file permissions
 
 ### Query Errors
 - Check that your question references valid columns
 - Ensure date formats are correct
-- Review the generated SQL query in the expandable section
+- Review the generated SQL query in the API response
+- Check the error message in the response for details
+
+### API Connection Issues
+- Make sure the API server is running: `python run_api.py`
+- Check if port 8000 is available
+- Verify the API is accessible: `curl http://localhost:8000/health`
 
 ## 📊 Performance Considerations
 
@@ -173,6 +290,7 @@ testing/
 - Use environment variables for sensitive data
 - Implement authentication for production deployments
 - Validate and sanitize user inputs
+- Configure CORS properly for production
 
 ## 📝 Assumptions & Limitations
 
@@ -191,13 +309,14 @@ testing/
 ## 🛠️ Future Improvements
 
 - [ ] Support for real-time data streaming
-- [ ] Advanced visualization options
-- [ ] Query history and favorites
+- [ ] Advanced visualization endpoints
+- [ ] Query history and caching
 - [ ] Export results to PDF/Excel
 - [ ] Multi-user support with authentication
 - [ ] Integration with cloud data warehouses
 - [ ] Advanced caching strategies
 - [ ] Cost tracking and optimization
+
 
 ## 📄 License
 
